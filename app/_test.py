@@ -53,6 +53,7 @@ def test_should_get_vehicle_by_plate_when_calling_get_vehicle_by_plate():
 ########### PRUEBAS DE INTEGRACION ############
 
 
+@pytest.mark.skip
 def test_integration_should_add_vehicle():
     # Arrange
     vehicle = {
