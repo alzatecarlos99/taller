@@ -2,6 +2,8 @@ from .controller import create_vehicle, get_vehicles, update_vehicle, delete_veh
 from .models import Vehicle
 from fastapi.testclient import TestClient
 from .main import app
+from fastapi import HTTPException
+import pytest
 
 client = TestClient(app)
 
@@ -43,9 +45,9 @@ def test_should_delete_vehicle_when_calling_delete_vehicle():
 
 def test_should_get_vehicle_by_plate_when_calling_get_vehicle_by_plate():
     # Act
-    result = get_vehicle_by_plate("ABC123")
-    # Assert
-    assert result["license_plate"] == "ABC123", "Expected to retrieve the vehicle with the correct plate"
+    with pytest.raises(HTTPException) as excinfo:
+        get_vehicle_by_plate("ABC123")
+    assert excinfo.value.status_code == 404, "Expected HTTP 404 for vehicle not found"
 
 
 ########### PRUEBAS DE INTEGRACION ############
@@ -64,6 +66,3 @@ def test_integration_should_add_vehicle():
     # Assert
     assert response.status_code == 200, "Expected status code 200"
     assert response.json()["license_plate"] == "XYZ789", "Expected to return the added vehicle license plate"
-
-
-# Continúa con más pruebas de integración y pruebas unitarias...

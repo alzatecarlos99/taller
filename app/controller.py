@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 from .models import Vehicle
-
 from fastapi import HTTPException
 
 client = MongoClient("mongodb://localhost:27017/")
@@ -55,6 +54,10 @@ def get_vehicle_by_plate(license_plate: str):
             return vehicle
         else:
             raise HTTPException(status_code=404, detail="Vehicle not found")
+    except HTTPException as http_ex:
+        # Re-raise the HTTP exceptions
+        raise http_ex
     except Exception as e:
+        # Handle all other exceptions as internal errors
         print(f"Error fetching vehicle by plate: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
