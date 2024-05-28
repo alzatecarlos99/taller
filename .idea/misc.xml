@@ -3,5 +3,8 @@
   <component name="Black">
     <option name="sdkName" value="fury_prompt-injection-identifier" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="TODOAPP" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="entorno_taller" project-jdk-type="Python SDK" />
+  <component name="PyPackaging">
+    <option name="earlyReleasesAsUpgrades" value="true" />
+  </component>
 </project>

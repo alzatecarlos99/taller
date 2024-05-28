@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle CRUD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin: 5px;
+        }
+        .vehicle {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vehicle CRUD</h1>
+    <form id="vehicleForm">
+        <input type="text" id="license_plate" placeholder="License Plate" required>
+        <input type="text" id="brand" placeholder="Brand" required>
+        <input type="text" id="model" placeholder="Model" required>
+        <input type="text" id="soat_company_name" placeholder="SOAT Company Name" required>
+        <input type="date" id="soat_start_date" placeholder="SOAT Start Date" required>
+        <input type="date" id="soat_end_date" placeholder="SOAT End Date" required>
+        <button type="submit">Add/Update Vehicle</button>
+    </form>
+    <div id="vehicleList"></div>
+
+    <script>
+        const apiUrl = 'http://127.0.0.1:8000/vehicles/';
+        let selectedVehicle = null;
+
+        document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const vehicle = {
+                license_plate: document.getElementById('license_plate').value,
+                brand: document.getElementById('brand').value,
+                model: document.getElementById('model').value,
+                soat: {
+                    company_name: document.getElementById('soat_company_name').value,
+                    start_date: document.getElementById('soat_start_date').value,
+                    end_date: document.getElementById('soat_end_date').value
+                }
+            };
+
+            if (selectedVehicle) {
+                await fetch(`${apiUrl}${selectedVehicle}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(vehicle)
+                });
+                selectedVehicle = null;
+            } else {
+                await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(vehicle)
+                });
+            }
+
+            document.getElementById('vehicleForm').reset();
+            loadVehicles();
+        });
+
+        async function loadVehicles() {
+            const response = await fetch(apiUrl);
+            const vehicles = await response.json();
+            const vehicleList = document.getElementById('vehicleList');
+            vehicleList.innerHTML = '';
+            vehicles.forEach(vehicle => {
+                const vehicleDiv = document.createElement('div');
+                vehicleDiv.className = 'vehicle';
+                vehicleDiv.innerHTML = `
+                    <h3>${vehicle.license_plate}</h3>
+                    <p>${vehicle.brand} ${vehicle.model}</p>
+                    <p>SOAT: ${vehicle.soat.company_name} (${vehicle.soat.start_date} - ${vehicle.soat.end_date})</p>
+                    <button onclick="editVehicle('${vehicle.license_plate}')">Edit</button>
+                    <button onclick="deleteVehicle('${vehicle.license_plate}')">Delete</button>
+                `;
+                vehicleList.appendChild(vehicleDiv);
+            });
+        }
+
+        window.editVehicle = async (license_plate) => {
+            const response = await fetch(`${apiUrl}${license_plate}`);
+            const vehicle = await response.json();
+            document.getElementById('license_plate').value = vehicle.license_plate;
+            document.getElementById('brand').value = vehicle.brand;
+            document.getElementById('model').value = vehicle.model;
+            document.getElementById('soat_company_name').value = vehicle.soat.company_name;
+            document.getElementById('soat_start_date').value = vehicle.soat.start_date;
+            document.getElementById('soat_end_date').value = vehicle.soat.end_date;
+            selectedVehicle = vehicle.license_plate;
+        };
+
+        window.deleteVehicle = async (license_plate) => {
+            await fetch(`${apiUrl}${license_plate}`, {
+                method: 'DELETE'
+            });
+            loadVehicles();
+        };
+
+        loadVehicles();
+    </script>
+</body>
+</html>
