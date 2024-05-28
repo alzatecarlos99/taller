@@ -1,11 +1,12 @@
 from pymongo import MongoClient
 from .models import Vehicle
-from bson import ObjectId
+
 from fastapi import HTTPException
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client["Taller"]
 vehicle_collection = db["vehiculos"]
+
 
 def create_vehicle(vehicle_data: Vehicle):
     try:
@@ -17,6 +18,7 @@ def create_vehicle(vehicle_data: Vehicle):
         print(f"Error inserting vehicle: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+
 def get_vehicles():
     try:
         vehicles = list(vehicle_collection.find({}, {"_id": 0}))
@@ -24,6 +26,7 @@ def get_vehicles():
     except Exception as e:
         print(f"Error fetching vehicles: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 def update_vehicle(license_plate, vehicle_data: Vehicle):
     try:
@@ -34,6 +37,7 @@ def update_vehicle(license_plate, vehicle_data: Vehicle):
         print(f"Error updating vehicle: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+
 def delete_vehicle(license_plate):
     try:
         print(f"Deleting vehicle with license_plate: {license_plate}")
@@ -42,6 +46,8 @@ def delete_vehicle(license_plate):
     except Exception as e:
         print(f"Error deleting vehicle: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
 def get_vehicle_by_plate(license_plate: str):
     try:
         vehicle = vehicle_collection.find_one({"license_plate": license_plate}, {"_id": 0})
