@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 from .models import Vehicle
 from fastapi import HTTPException
 
@@ -29,20 +29,22 @@ def get_vehicles():
 
 def update_vehicle(license_plate, vehicle_data: Vehicle):
     try:
-        print(f"Updating vehicle with license_plate {license_plate} to: {vehicle_data.dict()}")
-        vehicle_collection.update_one({"license_plate": license_plate}, {"$set": vehicle_data.dict()})
+        updated_result = vehicle_collection.update_one({"license_plate": license_plate}, {"$set": vehicle_data.dict()})
+        if updated_result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Vehicle not found")
         return vehicle_data.dict()
-    except Exception as e:
+    except errors.PyMongoError as e:  # Capturing specific MongoDB errors
         print(f"Error updating vehicle: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 def delete_vehicle(license_plate):
     try:
-        print(f"Deleting vehicle with license_plate: {license_plate}")
-        vehicle_collection.delete_one({"license_plate": license_plate})
+        delete_result = vehicle_collection.delete_one({"license_plate": license_plate})
+        if delete_result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Vehicle not found")
         return {"message": "Vehicle deleted"}
-    except Exception as e:
+    except errors.PyMongoError as e:  # Capturing specific MongoDB errors
         print(f"Error deleting vehicle: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
